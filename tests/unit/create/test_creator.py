@@ -131,6 +131,8 @@ def test_create_no_seed(  # noqa: C901, PLR0912, PLR0913, PLR0915
         f"--{method}",
     ]
     if isolated == "global":
+        if CURRENT.implementation == "GraalVM":
+            pytest.xfail("--system-site-packages broken on GraalPy")
         cmd.append("--system-site-packages")
     result = cli_run(cmd)
     creator = result.creator
@@ -305,6 +307,7 @@ def test_prompt_set(tmp_path, creator, prompt):
         assert cfg["prompt"] == actual_prompt
 
 
+@pytest.mark.xfail(sys.implementation.name == "graalpy", reason="GraalPy has a bug with PEP 405 home")
 @pytest.mark.parametrize("creator", CURRENT_CREATORS)
 def test_home_path_is_exe_parent(tmp_path, creator):
     cmd = [str(tmp_path), "--seeder", "app-data", "--without-pip", "--creator", creator]
@@ -436,7 +439,7 @@ def list_files(path):
     return result
 
 
-@pytest.mark.skipif(is_macos_brew(CURRENT), reason="no copy on brew")
+@pytest.mark.skipif(is_macos_brew(CURRENT) or sys.implementation.name == "graalpy", reason="no copy on brew or GraalPy")
 def test_zip_importer_can_import_setuptools(tmp_path):
     """We're patching the loaders so might fail on r/o loaders, such as zipimporter on CPython<3.8"""
     result = cli_run(
@@ -509,6 +512,7 @@ def test_pth_in_site_vs_python_path(tmp_path):
     assert out == "ok\n"
 
 
+@pytest.mark.xfail(sys.implementation.name == "graalpy", reason="adding system site-packages is broken on GraalPy")
 def test_getsitepackages_system_site(tmp_path):
     # Test without --system-site-packages
     session = cli_run([str(tmp_path)])
@@ -571,6 +575,7 @@ def test_get_site_packages(tmp_path):
         assert env_site_package in site_packages
 
 
+@pytest.mark.xfail(sys.implementation.name == "graalpy", reason="Unknown failure on GraalPy")
 def test_debug_bad_virtualenv(tmp_path):
     cmd = [str(tmp_path), "--without-pip"]
     result = cli_run(cmd)

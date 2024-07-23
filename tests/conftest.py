@@ -21,6 +21,11 @@ def pytest_addoption(parser):
     parser.addoption("--int", action="store_true", default=False, help="run integration tests")
 
 
+def pytest_runtest_setup(item):
+    if IS_GRAALPY and "slow" in [mark.name for mark in item.iter_markers()]:
+        pytest.skip(f"skip slow tests on GraalPy")
+
+
 def pytest_configure(config):
     """Ensure randomly is called before we re-order"""
     manager = config.pluginmanager

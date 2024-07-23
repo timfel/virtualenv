@@ -78,6 +78,7 @@ def test_manual_upgrade(session_app_data, caplog, mocker, for_py_version):
     assert packages == expected
 
 
+@pytest.mark.xfail(sys.implementation.name == "graalpy", reason="Mock is not called on GraalPy")
 @pytest.mark.usefixtures("session_app_data")
 def test_pick_periodic_update(tmp_path, mocker, for_py_version):
     embed, current = get_embed_wheel("setuptools", "3.6"), get_embed_wheel("setuptools", for_py_version)
@@ -276,6 +277,7 @@ def test_periodic_update_trigger(u_log, mocker, for_py_version, session_app_data
     assert load_datetime(wrote_json["started"]) == _UP_NOW
 
 
+@pytest.mark.xfail(sys.implementation.name == "graalpy", reason="MagicProxy is not callable on GraalPy")
 def test_trigger_update_no_debug(for_py_version, session_app_data, tmp_path, mocker, monkeypatch):
     monkeypatch.delenv("_VIRTUALENV_PERIODIC_UPDATE_INLINE", raising=False)
     current = get_embed_wheel("setuptools", for_py_version)
@@ -323,6 +325,7 @@ def test_trigger_update_no_debug(for_py_version, session_app_data, tmp_path, moc
     assert process.communicate.call_count == 0
 
 
+@pytest.mark.xfail(sys.implementation.name == "graalpy", reason="MagicProxy is not callable on GraalPy")
 def test_trigger_update_debug(for_py_version, session_app_data, tmp_path, mocker, monkeypatch):
     monkeypatch.setenv("_VIRTUALENV_PERIODIC_UPDATE_INLINE", "1")
     current = get_embed_wheel("pip", for_py_version)
